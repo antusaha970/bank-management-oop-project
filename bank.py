@@ -6,6 +6,16 @@ class Bank:
         self.totalLoan = 0
         self.isLoanOff = False
         self.isBankrupt = False
+        self.admins = []  # admin class object
+
+    def add_admin(self, admin):
+        self.admins.append(admin)
+
+    def add_bank_balance(self, amount):
+        self.totalAvailableBalance += amount
+
+    def withdraw_bank_balance(self, amount):
+        self.totalAvailableBalance -= amount
 
     def add_account(self, account):  # account object
         self.accounts.append(account)
@@ -27,7 +37,7 @@ class Bank:
                 return
 
     def view_all_account_list(self):
-        print("Account num\tOwner name\tAccount type")
+        print("AC_NO\tOwner name\tAccount type")
         for account in self.accounts:
             print(f"""{account.account_num}\t{
                   account.name}\t{account.account_type}""")
@@ -38,7 +48,7 @@ class Bank:
     def check_total_loan(self):
         print(f"Total loan: {self.totalLoan}")
 
-    def turn_of_loan_feature(self):
+    def turn_off_loan_feature(self):
         self.isLoanOff = True
 
     def set_bankrupt(self):

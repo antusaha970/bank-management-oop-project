@@ -7,7 +7,7 @@ class User:
         self.email = email
         self.account_type = account_type
         self.balance = 0
-        self.account_num = name + f"{randint(1, 100)}"
+        self.account_num = name  # + f"{randint(1, 100)}"
         self.transactions = []  # {'deposit': 500}
         self.loan_count = 0
 
@@ -17,10 +17,13 @@ class User:
     def add_transaction(self, name, amount):
         self.transactions.append({name: amount})
 
-    def deposit_money(self, money):
+    def deposit_money(self, money, bank, addToBank=True):
         if money > 0:
             self.balance += money
             self.add_transaction("deposit", money)
+            if addToBank:
+                bank.add_bank_balance(money)
+
         else:
             print("Negative money can't be deposited")
 
@@ -30,20 +33,25 @@ class User:
                 self.balance -= amount
                 print("Withdrawal successful")
                 self.add_transaction("withdrawal", amount)
+                bank.withdraw_bank_balance(amount)
 
             else:
                 print("Withdrawal amount exceeded")
         else:
             print("Can't withdraw amount because bank is bankrupt")
 
-    # todo: is loan amount is going to sum in user balance?
     def take_loan(self, bank, amount):  # bank object
         if not bank.isBankrupt:
             if not bank.isLoanOff:
                 if self.loan_count < 2:
-                    self.loan_count += 1
-                    bank.add_loan_amount(amount)  # bank class method
-                    print("Loan has given to you")
+                    if bank.totalAvailableBalance >= amount:
+                        self.loan_count += 1
+                        bank.add_loan_amount(amount)  # bank class method
+                        bank.withdraw_bank_balance(amount)  # bank class method
+                        self.deposit_money(amount, bank, False)
+                        print("Loan has given to you")
+                    else:
+                        print("Not enough money in the bank to give loan")
                 else:
                     print("You have reached to loan limit")
             else:
@@ -57,8 +65,9 @@ class User:
         if account:
             if self.available_balance() != 0 and self.available_balance() >= amount:
                 self.balance -= amount
-                account.deposit_money(amount)
+                account.deposit_money(amount, bank, False)
                 self.add_transaction("bank_transfer", amount)
+                print("Bank transfer successful")
             else:
                 print("Not enough money to transfer!!")
         else:
