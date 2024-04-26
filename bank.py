@@ -26,11 +26,18 @@ class Bank:
         self.admins.append(admin)
         print("A admin added")
 
-    def login_admin(self, admin):
+    def login_admin(self, admin):  # admin object
         for ad in self.admins:
             if ad.name == admin.name and ad.password == admin.password:
                 print("Login successful")
                 return admin
+        return False
+
+    def login_user(self, name, email):  # user object
+        for user in self.accounts:
+            if name == user.name and email == user.email:
+                print("Login successful")
+                return user
         return False
 
     def find_bank_account(self, account_no):
