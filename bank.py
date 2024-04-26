@@ -1,4 +1,3 @@
-# todo: is total available balance is the amount the sum of what users deposited?
 class Bank:
     def __init__(self) -> None:
         self.accounts = []  # user objects
@@ -22,6 +21,17 @@ class Bank:
 
     def add_loan_amount(self, amount):
         self.totalLoan += amount
+
+    def add_admin(self, admin):  # admin object
+        self.admins.append(admin)
+        print("A admin added")
+
+    def login_admin(self, admin):
+        for ad in self.admins:
+            if ad.name == admin.name and ad.password == admin.password:
+                print("Login successful")
+                return admin
+        return False
 
     def find_bank_account(self, account_no):
         for account in self.accounts:
@@ -50,6 +60,8 @@ class Bank:
 
     def turn_off_loan_feature(self):
         self.isLoanOff = True
+        print("Loan feature is turned off")
 
     def set_bankrupt(self):
         self.isBankrupt = True
+        print("Bankrupt is turned on")
