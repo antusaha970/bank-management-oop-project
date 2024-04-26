@@ -7,9 +7,12 @@ class User:
         self.email = email
         self.account_type = account_type
         self.balance = 0
-        self.account_num = name  # + f"{randint(1, 100)}"
+        self.account_num = name + f"{randint(1, 100)}"
         self.transactions = []  # {'deposit': 500}
         self.loan_count = 0
+
+    def view_account_num(self):
+        return self.account_num
 
     def available_balance(self):
         return self.balance

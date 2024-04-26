@@ -60,7 +60,8 @@ class Bank:
                   account.name}\t{account.account_type}""")
 
     def check_total_balance(self):
-        print(f"Total balance: {self.totalAvailableBalance}")
+        print(f"""Total balance: {
+              self.totalAvailableBalance}""")
 
     def check_total_loan(self):
         print(f"Total loan: {self.totalLoan}")

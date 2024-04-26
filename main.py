@@ -5,6 +5,8 @@ from admin import Admin
 
 def runSystem():
     bank = Bank()
+    default_admin = Admin("admin", "123", bank)
+    bank.add_admin(default_admin)
     while True:
         print("<--- Welcome to the bank --->")
         print("1. Continue as admin")
@@ -14,7 +16,7 @@ def runSystem():
         if cmd == 1:  # continue as admin
             while True:
                 print("<--- Admin options --->")
-                print("1. Create and admin account")
+                print("1. Create an admin account")
                 print("2. Login to admin account")
                 print("3. Exit")
                 op = int(input("Enter your option: "))
@@ -103,6 +105,8 @@ def runSystem():
                     account_type = input("Enter your account type: ")
                     user = User(name, email, account_type)
                     bank.add_account(user)
+                    print(f"""Account created!\nYour account no: {
+                          user.view_account_num()}""")
                     while True:
                         print("1. Deposit money")
                         print("2. Withdraw money")
