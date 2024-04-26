@@ -1,6 +1,187 @@
-from user import User
-from bank import Bank
-from admin import Admin
+from random import randint
+
+
+class User:
+    def __init__(self, name, email, account_type) -> None:
+        self.name = name
+        self.email = email
+        self.account_type = account_type
+        self.balance = 0
+        self.account_num = name + f"{randint(1, 100)}"
+        self.transactions = []  # {'deposit': 500}
+        self.loan_count = 0
+
+    def view_account_num(self):
+        return self.account_num
+
+    def available_balance(self):
+        return self.balance
+
+    def add_transaction(self, name, amount):
+        self.transactions.append({name: amount})
+
+    def deposit_money(self, money, bank, addToBank=True):
+        if money > 0:
+            self.balance += money
+            self.add_transaction("deposit", money)
+            if addToBank:
+                bank.add_bank_balance(money)
+
+        else:
+            print("Negative money can't be deposited")
+
+    def withdraw_money(self, amount, bank):  # bank object
+        if not bank.isBankrupt:
+            if self.available_balance() >= amount and self.available_balance() != 0:
+                self.balance -= amount
+                print("Withdrawal successful")
+                self.add_transaction("withdrawal", amount)
+                bank.withdraw_bank_balance(amount)
+
+            else:
+                print("Withdrawal amount exceeded")
+        else:
+            print("Can't withdraw amount because bank is bankrupt")
+
+    def take_loan(self, bank, amount):  # bank object
+        if not bank.isBankrupt:
+            if not bank.isLoanOff:
+                if self.loan_count < 2:
+                    if bank.totalAvailableBalance >= amount:
+                        self.loan_count += 1
+                        bank.add_loan_amount(amount)  # bank class method
+                        bank.withdraw_bank_balance(amount)  # bank class method
+                        self.deposit_money(amount, bank, False)
+                        print("Loan has given to you")
+                    else:
+                        print("Not enough money in the bank to give loan")
+                else:
+                    print("You have reached to loan limit")
+            else:
+                print("Bank has turn offed the loan feature")
+
+        else:
+            print("Bank is bankrupt")
+
+    def transfer_money(self, account_no, amount, bank):  # bank object
+        account = bank.find_bank_account(account_no)  # bank class method
+        if account:
+            if self.available_balance() != 0 and self.available_balance() >= amount:
+                self.balance -= amount
+                account.deposit_money(amount, bank, False)
+                self.add_transaction("bank_transfer", amount)
+                print("Bank transfer successful")
+            else:
+                print("Not enough money to transfer!!")
+        else:
+            print("Account does not exist")
+
+    def show_all_transaction(self):
+        print("Your transactions!!")
+        for transaction in self.transactions:
+            print(transaction)
+
+
+class Bank:
+    def __init__(self) -> None:
+        self.accounts = []  # user objects
+        self.totalAvailableBalance = 0
+        self.totalLoan = 0
+        self.isLoanOff = False
+        self.isBankrupt = False
+        self.admins = []  # admin class object
+
+    def add_admin(self, admin):
+        self.admins.append(admin)
+
+    def add_bank_balance(self, amount):
+        self.totalAvailableBalance += amount
+
+    def withdraw_bank_balance(self, amount):
+        self.totalAvailableBalance -= amount
+
+    def add_account(self, account):  # account object
+        self.accounts.append(account)
+
+    def add_loan_amount(self, amount):
+        self.totalLoan += amount
+
+    def add_admin(self, admin):  # admin object
+        self.admins.append(admin)
+        print("A admin added")
+
+    def login_admin(self, admin):  # admin object
+        for ad in self.admins:
+            if ad.name == admin.name and ad.password == admin.password:
+                print("Login successful")
+                return admin
+        return False
+
+    def login_user(self, name, email):  # user object
+        for user in self.accounts:
+            if name == user.name and email == user.email:
+                print("Login successful")
+                return user
+        return False
+
+    def find_bank_account(self, account_no):
+        for account in self.accounts:
+            if account.account_num == account_no:
+                return account
+        return False
+
+    def delete_user_account(self, account_no):
+        for account in self.accounts:
+            if account.account_num == account_no:
+                self.accounts.remove(account)
+                print("Account deleted!!!")
+                return
+
+    def view_all_account_list(self):
+        print("AC_NO\tOwner name\tAccount type")
+        for account in self.accounts:
+            print(f"""{account.account_num}\t{
+                  account.name}\t{account.account_type}""")
+
+    def check_total_balance(self):
+        print(f"""Total balance: {
+              self.totalAvailableBalance}""")
+
+    def check_total_loan(self):
+        print(f"Total loan: {self.totalLoan}")
+
+    def turn_off_loan_feature(self):
+        self.isLoanOff = True
+        print("Loan feature is turned off")
+
+    def set_bankrupt(self):
+        self.isBankrupt = True
+        print("Bankrupt is turned on")
+
+
+class Admin:
+    def __init__(self, name, password, bank) -> None:
+        self.name = name
+        self.password = password
+        self.bank = bank
+
+    def delete_user_account(self, account_no):
+        self.bank.delete_user_account(account_no)
+
+    def see_all_users(self):
+        self.bank.view_all_account_list()
+
+    def check_bank_available_balance(self):
+        self.bank.check_total_balance()
+
+    def check_bank_given_loan(self):
+        self.bank.check_total_loan()
+
+    def turn_off_bank_loan_feature(self):
+        self.bank.turn_off_loan_feature()
+
+    def set_bank_to_bankrupt(self):
+        self.bank.set_bankrupt()
 
 
 def runSystem():
@@ -30,7 +211,7 @@ def runSystem():
                         print("2. View all users account list")
                         print("3. View total bank balance")
                         print("4. View total bank loan amount")
-                        print("5. Turn of loan feature")
+                        print("5. Turn off loan feature")
                         print("6. Set bank to bank to bankrupt")
                         print("7. Exit")
                         admin_op = int(input("Please choose your option: "))
@@ -60,9 +241,9 @@ def runSystem():
                         while True:
                             print("1. Delete user account")
                             print("2. View all users account list")
-                            print("3. View all total bank balance")
-                            print("4. View all total bank loan amount")
-                            print("5. Turn of loan feature")
+                            print("3. View total bank balance")
+                            print("4. View total bank loan amount")
+                            print("5. Turn off loan feature")
                             print("6. Set bank to bank to bankrupt")
                             print("7. Exit")
                             admin_op = int(
